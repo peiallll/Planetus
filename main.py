@@ -2,10 +2,11 @@ import pygame as pg
 import random as r
 
 from settings import settings as s 
+from physics.body import Body
 
 run_once = True
 
-star_pos = []
+body_list = []
 
 def main():
     pg.init()
@@ -19,18 +20,24 @@ def main():
 
     while running:
         screen.fill((0,0,0))
-
-        for x in range(150):
-            new_point = [r.randint(0, WIDTH), r.randint(0, HEIGHT)]
-            star_pos.append(new_point)
-            
-            pg.draw.circle(screen, (255, 255, 255), (star_pos[x]), 1, width=0)
-
         dt = clock.get_time() / 1000
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
+
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_b:
+                    body_list.append(Body(
+                        r.randint(0, WIDTH),
+                        r.randint(0, HEIGHT),
+                        0,
+                        0,
+                        5,
+                        8,
+                        (r.randint(0,255),r.randint(0,255),r.randint(0,255))
+                    ))
+                    print(body_list)
 
         # rest of updating simulation here
 
