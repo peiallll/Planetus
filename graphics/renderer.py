@@ -13,3 +13,7 @@ class Renderer:
     def draw_background(self, screen):
         for x, y in self.stars:
             pg.draw.circle(screen, (255,255,255), (x, y), 1)
+
+    def draw_bodies(self, screen, bodies):
+        for body in bodies:
+            pg.draw.circle(screen, body.colour, (body.x, body.y), body.radius)
