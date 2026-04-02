@@ -3,10 +3,12 @@ import random as r
 
 from settings import settings as s 
 from physics.body import Body
+from graphics.renderer import Renderer
 
 run_once = True
-
 body_list = []
+
+renderer = Renderer()
 
 def main():
     pg.init()
@@ -21,6 +23,8 @@ def main():
     while running:
         screen.fill((0,0,0))
         dt = clock.get_time() / 1000
+
+        renderer.draw_background(screen)
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
