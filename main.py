@@ -11,6 +11,7 @@ simulation = Simulation()
 
 def main():
     pg.init()
+    pg.font.init()
 
     WIDTH, HEIGHT = s.WIDTH, s.HEIGHT
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -21,7 +22,7 @@ def main():
 
     while running:
         screen.fill((0,0,0))
-        dt = clock.get_time() / 1000
+        dt = clock.tick(s.FPS) / 1000
 
         renderer.draw_background(screen)
         renderer.draw_bodies(screen, simulation.bodies)
@@ -35,7 +36,7 @@ def main():
                     simulation.add_random_body()
                     print(simulation.bodies)
 
-        # rest of updating simulation here
+        simulation.update(dt)
 
         pg.display.flip()
         clock.tick(s.FPS)
