@@ -1,6 +1,6 @@
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1200
+HEIGHT = 1000
 
 FPS = 60
 
-G = 5
+G = 1

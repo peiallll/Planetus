@@ -8,6 +8,10 @@ from settings import settings as s
 class Simulation:
     def __init__(self):
         self.bodies = []
+        self.current_mass = 5000
+
+    def adjust_mass(self, amount):
+        self.current_mass = max(10, self.current_mass + amount)
 
     def add_random_body(self):
         x = pg.mouse.get_pos()[0]
@@ -17,9 +21,9 @@ class Simulation:
                 Body(
                     x,
                     y,
-                    20,
-                    20,
-                    5000,
+                    0,
+                    0,
+                    self.current_mass,
                     8,
                     (r.randint(0,255), r.randint(0,255), r.randint(0,255))
                 )
@@ -58,3 +62,7 @@ class Simulation:
         for body in self.bodies:
             body.x += body.vx * dt
             body.y += body.vy * dt
+
+        for body in self.bodies:
+            if body.x > s.WIDTH * 2 or body.y > s.HEIGHT * 2:
+                self.bodies.remove(body)

@@ -11,7 +11,6 @@ simulation = Simulation()
 
 def main():
     pg.init()
-    pg.font.init()
 
     WIDTH, HEIGHT = s.WIDTH, s.HEIGHT
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -20,6 +19,8 @@ def main():
     clock = pg.time.Clock()
     running = True
 
+    current_mass = 5000
+
     while running:
         screen.fill((0,0,0))
         dt = clock.tick(s.FPS) / 1000
@@ -27,6 +28,8 @@ def main():
         renderer.draw_background(screen)
         renderer.draw_bodies(screen, simulation.bodies)
 
+        keys = pg.key.get_pressed()
+        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -36,7 +39,17 @@ def main():
                     simulation.add_random_body()
                     print(simulation.bodies)
 
+        if keys[pg.K_UP]:
+            simulation.adjust_mass(10000)
+        if keys[pg.K_DOWN]:
+            simulation.adjust_mass(-10000)
+
         simulation.update(dt)
+
+        renderer.draw_background(screen)
+        renderer.draw_bodies(screen, simulation.bodies)
+
+        renderer.draw_mass_text(screen, simulation.current_mass)
 
         pg.display.flip()
         clock.tick(s.FPS)
