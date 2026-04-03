@@ -39,6 +39,9 @@ def main():
                     simulation.add_random_body()
                     print(simulation.bodies)
 
+                if event.key == pg.K_SPACE:
+                    simulation.toggle_pause()
+                    
         if keys[pg.K_UP]:
             simulation.adjust_mass(10000)
         if keys[pg.K_DOWN]:
@@ -50,6 +53,7 @@ def main():
         renderer.draw_bodies(screen, simulation.bodies)
 
         renderer.draw_mass_text(screen, simulation.current_mass)
+        renderer.enable_paused_text(screen, simulation.paused_text)
 
         pg.display.flip()
         clock.tick(s.FPS)

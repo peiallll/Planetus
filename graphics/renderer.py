@@ -4,6 +4,7 @@ from settings import settings as s
 
 pg.font.init()
 mass_font = pg.font.SysFont('Arial', 30)
+paused_font = pg.font.SysFont('Arial', 35)
 
 class Renderer:
     def __init__(self):
@@ -25,3 +26,8 @@ class Renderer:
         mass_text = mass_font.render(f"Mass: {mass}", True, (255, 255, 255))
         text_rect = mass_text.get_rect(center=(s.WIDTH * 0.9, s.HEIGHT * 0.9))
         screen.blit(mass_text, text_rect)
+    
+    def enable_paused_text(self, screen, paused_state):
+        paused_text = paused_font.render(f"{paused_state}", True, (200, 200, 200))
+        text_rect = paused_text.get_rect(center=(s.WIDTH * 0.5, s.HEIGHT * 0.1))
+        screen.blit(paused_text, text_rect)

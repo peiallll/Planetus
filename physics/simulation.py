@@ -9,9 +9,15 @@ class Simulation:
     def __init__(self):
         self.bodies = []
         self.current_mass = 5000
+        self.paused = False
+        self.paused_text = ""
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
+
+    def toggle_pause(self):
+        self.paused = not self.paused
+        self.paused_text = "PAUSED" if self.paused else ""
 
     def add_random_body(self):
         x = pg.mouse.get_pos()[0]
@@ -30,6 +36,9 @@ class Simulation:
             )
 
     def update(self, dt):
+        if self.paused:
+            return
+        
         for body in self.bodies:
             total_fx = 0
             total_fy = 0
