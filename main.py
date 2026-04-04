@@ -20,6 +20,7 @@ def main():
     running = True
 
     current_mass = 5000
+    drawing_line = False
 
     while running:
         screen.fill((0,0,0))
@@ -36,21 +37,39 @@ def main():
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_b:
+                    if drawing_line:
+                        continue        
+                    drawing_line = True
                     simulation.add_random_body()
                     print(simulation.bodies)
 
+                if event.key == pg.K_x:
+                    simulation.bodies.clear()
+
                 if event.key == pg.K_SPACE:
+                    if drawing_line:
+                        continue
                     simulation.toggle_pause()
                     
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    if simulation.current_body:
+                        drawing_line = False
+                        simulation.current_body = None
+
         if keys[pg.K_UP]:
-            simulation.adjust_mass(10000)
+            simulation.adjust_mass(1000)
         if keys[pg.K_DOWN]:
-            simulation.adjust_mass(-10000)
+            simulation.adjust_mass(-1000)
 
         simulation.update(dt)
 
         renderer.draw_background(screen)
         renderer.draw_bodies(screen, simulation.bodies)
+
+        if drawing_line and simulation.current_body:
+            simulation.set_inital_velocity(simulation.current_body)
+            renderer.draw_line(screen, simulation.current_body, simulation.current_body_vx, simulation.current_body_vy)
 
         renderer.draw_mass_text(screen, simulation.current_mass)
         renderer.enable_paused_text(screen, simulation.paused_text)
