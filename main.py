@@ -25,9 +25,6 @@ def main():
         screen.fill((0,0,0))
         dt = clock.tick(s.FPS) / 1000
 
-        renderer.draw_background(screen)
-        renderer.draw_bodies(screen, simulation.bodies)
-
         keys = pg.key.get_pressed()
         
         for event in pg.event.get():
@@ -49,6 +46,11 @@ def main():
                     if drawing_line:
                         continue
                     simulation.toggle_pause()
+
+                if event.key == pg.K_LSHIFT:
+                    simulation.sim_speed = min(15, simulation.sim_speed + 1)
+                if event.key == pg.K_LCTRL:
+                    simulation.sim_speed = max(1, simulation.sim_speed - 1)
                     
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -63,15 +65,17 @@ def main():
 
         simulation.update(dt)
 
-        renderer.draw_background(screen)
+        renderer.draw_bodies(screen, simulation.bodies)
+        renderer.draw_background(screen, simulation.sim_speed)
         renderer.draw_bodies(screen, simulation.bodies)
 
         if drawing_line and simulation.current_body:
             simulation.set_inital_velocity(simulation.current_body)
-
             ghost_path = simulation.ghost_orbit(simulation.current_body)
 
-            renderer.draw_ghost_orbit(screen, ghost_path)
+            if simulation.current_body_initial_velocity > 0:
+                renderer.draw_ghost_orbit(screen, ghost_path) 
+
             renderer.draw_line(screen, simulation.current_body, simulation.current_body_initial_velocity)
 
         renderer.draw_mass_text(screen, simulation.current_mass)

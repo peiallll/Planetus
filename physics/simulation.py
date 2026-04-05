@@ -16,6 +16,7 @@ class Simulation:
         self.paused_text = ""
         self.id = 1
         self.ghost_bodies = []
+        self.sim_speed = 1
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
@@ -35,13 +36,13 @@ class Simulation:
 
         self.current_body_initial_velocity = round(m.sqrt((body.vx**2) + (body.vy**2)), 2)
 
-    def ghost_orbit(self, current_body, steps=1000, dt=0.1):
+    def ghost_orbit(self, current_body, steps=3000, dt=0.1, record_every=10):
         self.ghost_bodies = [copy.copy(b) for b in self.bodies]
         path_points = []
 
         current_ghost = self.ghost_bodies[-1]
 
-        for _ in range(steps):
+        for i in range(steps):
             for ghost in self.ghost_bodies:
                 total_fx, total_fy = 0, 0
                 for neighbour in self.ghost_bodies:
@@ -66,7 +67,8 @@ class Simulation:
                 ghost.x += ghost.vx * dt
                 ghost.y += ghost.vy * dt
                 
-            path_points.append((current_ghost.x, current_ghost.y))
+            if i % record_every == 0:
+                path_points.append((current_ghost.x, current_ghost.y))
         return path_points
 
     def add_random_body(self):
@@ -95,39 +97,40 @@ class Simulation:
         if self.paused:
             return
         
-        for body in self.bodies:
-            total_fx = 0
-            total_fy = 0
-            for neighbour in self.bodies:
-                if neighbour is body:
-                    continue
+        for _ in range(self.sim_speed):
+            for body in self.bodies:
+                total_fx = 0
+                total_fy = 0
+                for neighbour in self.bodies:
+                    if neighbour is body:
+                        continue
 
-                dx = neighbour.x - body.x
-                dy = neighbour.y - body.y
+                    dx = neighbour.x - body.x
+                    dy = neighbour.y - body.y
 
-                distance = m.sqrt(dx**2 + dy**2)
-                #
-                direction_x = dx / distance
-                direction_y = dy / distance
+                    distance = m.sqrt(dx**2 + dy**2)
+                    #
+                    direction_x = dx / distance
+                    direction_y = dy / distance
 
-                force = (s.G * body.mass * neighbour.mass) / (distance**2 + 0.1) #Newton's law
+                    force = (s.G * body.mass * neighbour.mass) / (distance**2 + 0.1) #Newton's law
 
-                fx = force * direction_x
-                fy = force * direction_y
+                    fx = force * direction_x
+                    fy = force * direction_y
 
-                total_fx += fx
-                total_fy += fy
+                    total_fx += fx
+                    total_fy += fy
 
-            ax = total_fx / body.mass
-            ay = total_fy / body.mass
+                ax = total_fx / body.mass
+                ay = total_fy / body.mass
 
-            body.vx += ax * dt
-            body.vy += ay * dt
+                body.vx += ax * dt
+                body.vy += ay * dt
 
-        for body in self.bodies:
-            body.x += body.vx * dt
-            body.y += body.vy * dt
+            for body in self.bodies:
+                body.x += body.vx * dt
+                body.y += body.vy * dt
 
-        for body in self.bodies:
-            if body.x > s.WIDTH * 2 or body.x < -s.WIDTH * 2 or body.y > s.HEIGHT * 2 or body.y < -s.HEIGHT * 2:
-                self.bodies.remove(body)
+            for body in self.bodies:
+                if body.x > s.WIDTH * 2 or body.x < -s.WIDTH * 2 or body.y > s.HEIGHT * 2 or body.y < -s.HEIGHT * 2:
+                    self.bodies.remove(body)
