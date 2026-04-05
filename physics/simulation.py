@@ -10,10 +10,10 @@ class Simulation:
         self.bodies = []
         self.current_body = None
         self.current_mass = 5000
-        self.current_body_vx = 0
-        self.current_body_vy = 0
+        self.current_body_initial_velocity = 0
         self.paused = False
         self.paused_text = ""
+        self.id = 1
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
@@ -27,12 +27,11 @@ class Simulation:
 
         dx = x - body.x
         dy = y - body.y
-
-        self.current_body_vx = dx / 5
-        self.current_body_vy = dy / 5
         
-        body.vx = self.current_body_vx
-        body.vy = self.current_body_vy
+        body.vx = dx / 5
+        body.vy = dy / 5
+
+        self.current_body_initial_velocity = round(m.sqrt((body.vx**2) + (body.vy**2)), 2)
 
     def add_random_body(self):
         self.paused = True
@@ -48,11 +47,13 @@ class Simulation:
                     0,
                     self.current_mass,
                     self.current_mass ** (1/5),
-                    (r.randint(0,255), r.randint(0,255), r.randint(0,255))
+                    (r.randint(0,255), r.randint(0,255), r.randint(0,255)),
+                    f"{self.id}"
                 )
             
             self.current_body = new_body
             self.bodies.append(new_body)
+            self.id += 1
 
     def update(self, dt):
         if self.paused:

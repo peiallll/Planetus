@@ -6,12 +6,10 @@ pg.font.init()
 mass_font = pg.font.SysFont('Arial', 30)
 paused_font = pg.font.SysFont('Arial', 35)
 
-vx_font = pg.font.SysFont('Arial', 15)
-vy_font = pg.font.SysFont('Arial', 15)
+v_font = pg.font.SysFont('Arial', 15)
 
 class Renderer:
     def __init__(self):
-        # generate stars once
         self.stars = [
             (r.randint(0, s.WIDTH), r.randint(0, s.HEIGHT))
             for _ in range(150)
@@ -25,20 +23,17 @@ class Renderer:
         for body in bodies:
             pg.draw.circle(screen, body.colour, (body.x, body.y), body.radius)
 
-    def draw_line(self, screen, body, vx, vy):
+    def draw_line(self, screen, body, v):
         mouse_pos = pg.mouse.get_pos()
         pg.draw.line(screen, (255,255,255), (body.x, body.y), mouse_pos, 5)
 
         line_midpoint_x = (body.x + mouse_pos[0]) // 2
         line_midpoint_y = (body.y + mouse_pos[1]) // 2
 
-        vx_text = vx_font.render(f"vx: {vx}", True, (255, 255, 255))
-        vx_rect = vx_text.get_rect(center=(line_midpoint_x, line_midpoint_y + 30))
+        v_text = v_font.render(f"velocity: {v}", True, (255, 255, 255))
+        v_rect = v_text.get_rect(center=(line_midpoint_x, line_midpoint_y + 30))
 
-        vy_text = vy_font.render(f"vy: {-vy}", True, (255, 255, 255))
-        vy_rect = vy_text.get_rect(center=(line_midpoint_x, line_midpoint_y + 55))
-        
-        screen.blit(vx_text, vx_rect); screen.blit(vy_text, vy_rect)
+        screen.blit(v_text, v_rect)
 
     def draw_mass_text(self, screen, mass):
         mass_text = mass_font.render(f"Mass: {mass}", True, (255, 255, 255))

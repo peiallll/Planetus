@@ -69,7 +69,7 @@ def main():
 
         if drawing_line and simulation.current_body:
             simulation.set_inital_velocity(simulation.current_body)
-            renderer.draw_line(screen, simulation.current_body, simulation.current_body_vx, simulation.current_body_vy)
+            renderer.draw_line(screen, simulation.current_body, simulation.current_body_initial_velocity)
 
         renderer.draw_mass_text(screen, simulation.current_mass)
         renderer.enable_paused_text(screen, simulation.paused_text)
