@@ -16,5 +16,8 @@ class Body:
 
         self.name = name
 
+        self.trail_points = {}
+        self.trail_count = 0
+
     def __repr__(self):
         return f"Body(id={self.name}, mass={self.mass})"

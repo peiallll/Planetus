@@ -1,6 +1,7 @@
 import pygame as pg
 import random as r
 import math as m
+import time as t
 import copy
 
 from physics.body import Body
@@ -17,6 +18,10 @@ class Simulation:
         self.id = 1
         self.ghost_bodies = []
         self.sim_speed = 1
+        self.trail_points = []
+        self.trail_decider = 0
+        self.trail_decider_value = 1
+        self.trail_enabled = True
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
@@ -131,6 +136,21 @@ class Simulation:
                 body.x += body.vx * dt
                 body.y += body.vy * dt
 
+                if self.trail_enabled:
+                    if self.trail_decider % self.trail_decider_value == 0:
+                        body.trail_points[(body.x, body.y)] = t.time()
+
+                    while body.trail_points:
+                        oldest_point = next(iter(body.trail_points))
+                        if t.time() - body.trail_points[oldest_point] < 5:
+                            break
+                        del body.trail_points[oldest_point]
+                else:
+                    if len(body.trail_points) != 0:
+                        body.trail_points.clear()
+
             for body in self.bodies:
                 if body.x > s.WIDTH * 2 or body.x < -s.WIDTH * 2 or body.y > s.HEIGHT * 2 or body.y < -s.HEIGHT * 2:
                     self.bodies.remove(body)
+
+            self.trail_decider += 1

@@ -1,4 +1,6 @@
 import pygame as pg
+import pygame_widgets
+from pygame_widgets.button import Button
 import random as r
 
 from settings import settings as s 
@@ -8,6 +10,29 @@ from physics.simulation import Simulation
 
 renderer = Renderer()
 simulation = Simulation()
+
+dotted_button = None
+option = 1
+btn_font = pg.font.SysFont('Arial', 20)
+
+def toggle_trail():
+    global option
+    option += 1
+    if option > 3:
+        option = 1
+
+    if option == 1:
+        simulation.trail_enabled = True
+        simulation.trail_decider_value = 1
+        dotted_button.setText("SOLID")
+    elif option == 2:
+        simulation.trail_enabled = True
+        simulation.trail_decider_value = 10
+        dotted_button.setText("DOTTED")
+    elif option == 3:
+        simulation.trail_enabled = False
+        dotted_button.setText("NO TRAIL")        
+
 
 def main():
     pg.init()
@@ -21,13 +46,17 @@ def main():
 
     drawing_line = False
 
+    global dotted_button
+    dotted_button = Button(screen, 10, 10, 100, 40, text='SOLID', font=btn_font, onClick=toggle_trail)
+
     while running:
         screen.fill((0,0,0))
         dt = clock.tick(s.FPS) / 1000
 
         keys = pg.key.get_pressed()
-        
-        for event in pg.event.get():
+        events = pg.event.get()
+
+        for event in events:
             if event.type == pg.QUIT:
                 running = False
 
@@ -48,7 +77,7 @@ def main():
                     simulation.toggle_pause()
 
                 if event.key == pg.K_LSHIFT:
-                    simulation.sim_speed = min(15, simulation.sim_speed + 1)
+                    simulation.sim_speed = min(100, simulation.sim_speed + 1)
                 if event.key == pg.K_LCTRL:
                     simulation.sim_speed = max(1, simulation.sim_speed - 1)
                     
@@ -68,6 +97,7 @@ def main():
         renderer.draw_bodies(screen, simulation.bodies)
         renderer.draw_background(screen, simulation.sim_speed)
         renderer.draw_bodies(screen, simulation.bodies)
+        renderer.draw_body_trail(screen, simulation.bodies) 
 
         if drawing_line and simulation.current_body:
             simulation.set_inital_velocity(simulation.current_body)
@@ -81,6 +111,7 @@ def main():
         renderer.draw_mass_text(screen, simulation.current_mass)
         renderer.enable_paused_text(screen, simulation.paused_text)
 
+        pygame_widgets.update(events) 
         pg.display.flip()
     pg.quit()
 

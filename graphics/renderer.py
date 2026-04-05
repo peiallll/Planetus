@@ -1,4 +1,5 @@
 import pygame as pg
+import pygame_widgets as widgets
 import random as r
 from settings import settings as s
 
@@ -45,6 +46,11 @@ class Renderer:
     def draw_ghost_orbit(self, screen, path_points):
         for point in path_points:
             pg.draw.circle(screen, (110,110,110), point, 2)
+
+    def draw_body_trail(self, screen, bodies):
+        for body in bodies:
+            for point in body.trail_points:
+                pg.draw.circle(screen, body.colour, point, 1)
 
     def draw_mass_text(self, screen, mass):
         mass_text = mass_font.render(f"Mass: {mass}", True, (255, 255, 255))
