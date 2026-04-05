@@ -1,6 +1,7 @@
 import pygame as pg
 import random as r
 import math as m
+import copy
 
 from physics.body import Body
 from settings import settings as s
@@ -14,6 +15,7 @@ class Simulation:
         self.paused = False
         self.paused_text = ""
         self.id = 1
+        self.ghost_bodies = []
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
@@ -32,6 +34,40 @@ class Simulation:
         body.vy = dy / 5
 
         self.current_body_initial_velocity = round(m.sqrt((body.vx**2) + (body.vy**2)), 2)
+
+    def ghost_orbit(self, current_body, steps=1000, dt=0.1):
+        self.ghost_bodies = [copy.copy(b) for b in self.bodies]
+        path_points = []
+
+        current_ghost = self.ghost_bodies[-1]
+
+        for _ in range(steps):
+            for ghost in self.ghost_bodies:
+                total_fx, total_fy = 0, 0
+                for neighbour in self.ghost_bodies:
+                    if neighbour is ghost: continue
+                    
+                    dx = neighbour.x - ghost.x
+                    dy = neighbour.y - ghost.y
+                    distance = m.sqrt((dx**2) + (dy**2))
+                    
+                    force = (s.G * ghost.mass * neighbour.mass) / (distance**2 + 0.1)
+
+                    total_fx += force * (dx / distance)
+                    total_fy += force * (dy / distance)
+                
+                ax = total_fx / ghost.mass
+                ay = total_fy / ghost.mass
+
+                ghost.vx += ax * dt
+                ghost.vy += ay * dt
+
+            for ghost in self.ghost_bodies:
+                ghost.x += ghost.vx * dt
+                ghost.y += ghost.vy * dt
+                
+            path_points.append((current_ghost.x, current_ghost.y))
+        return path_points
 
     def add_random_body(self):
         self.paused = True
@@ -74,7 +110,7 @@ class Simulation:
                 direction_x = dx / distance
                 direction_y = dy / distance
 
-                force = s.G * body.mass * neighbour.mass / (distance**2 + 0.1) #Newton's law
+                force = (s.G * body.mass * neighbour.mass) / (distance**2 + 0.1) #Newton's law
 
                 fx = force * direction_x
                 fy = force * direction_y

@@ -19,7 +19,6 @@ def main():
     clock = pg.time.Clock()
     running = True
 
-    current_mass = 5000
     drawing_line = False
 
     while running:
@@ -58,9 +57,9 @@ def main():
                         simulation.current_body = None
 
         if keys[pg.K_UP]:
-            simulation.adjust_mass(1000)
+            simulation.adjust_mass(10000)
         if keys[pg.K_DOWN]:
-            simulation.adjust_mass(-1000)
+            simulation.adjust_mass(-10000)
 
         simulation.update(dt)
 
@@ -69,14 +68,16 @@ def main():
 
         if drawing_line and simulation.current_body:
             simulation.set_inital_velocity(simulation.current_body)
+
+            ghost_path = simulation.ghost_orbit(simulation.current_body)
+
+            renderer.draw_ghost_orbit(screen, ghost_path)
             renderer.draw_line(screen, simulation.current_body, simulation.current_body_initial_velocity)
 
         renderer.draw_mass_text(screen, simulation.current_mass)
         renderer.enable_paused_text(screen, simulation.paused_text)
 
         pg.display.flip()
-        clock.tick(s.FPS)
-
     pg.quit()
 
 if __name__ == "__main__":

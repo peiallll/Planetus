@@ -35,6 +35,10 @@ class Renderer:
 
         screen.blit(v_text, v_rect)
 
+    def draw_ghost_orbit(self, screen, path_points):
+        for point in path_points:
+            pg.draw.circle(screen, (200,200,200), point, 2)
+
     def draw_mass_text(self, screen, mass):
         mass_text = mass_font.render(f"Mass: {mass}", True, (255, 255, 255))
         text_rect = mass_text.get_rect(center=(s.WIDTH * 0.9, s.HEIGHT * 0.9))
