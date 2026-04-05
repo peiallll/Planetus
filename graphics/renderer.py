@@ -5,6 +5,7 @@ from settings import settings as s
 pg.font.init()
 mass_font = pg.font.SysFont('Arial', 30)
 paused_font = pg.font.SysFont('Arial', 35)
+instructions_font = pg.font.SysFont('Arial', 25)
 
 v_font = pg.font.SysFont('Arial', 15)
 
@@ -19,13 +20,17 @@ class Renderer:
         for x, y in self.stars:
             pg.draw.circle(screen, (255,255,255), (x, y), 1)
 
+        for i, line in enumerate("B to create new bodies\nSpace to pause\nX to clear all bodies on screen".split("\n")):
+            instructions_text = instructions_font.render(line, True, (255,255,255))
+            screen.blit(instructions_text, (s.WIDTH * 0.025, (s.HEIGHT * 0.95) - i * 35))
+
     def draw_bodies(self, screen, bodies):
         for body in bodies:
             pg.draw.circle(screen, body.colour, (body.x, body.y), body.radius)
 
     def draw_line(self, screen, body, v):
         mouse_pos = pg.mouse.get_pos()
-        pg.draw.line(screen, (255,255,255), (body.x, body.y), mouse_pos, 5)
+        pg.draw.line(screen, (255,175,175), (body.x, body.y), mouse_pos, 5)
 
         line_midpoint_x = (body.x + mouse_pos[0]) // 2
         line_midpoint_y = (body.y + mouse_pos[1]) // 2
@@ -37,7 +42,7 @@ class Renderer:
 
     def draw_ghost_orbit(self, screen, path_points):
         for point in path_points:
-            pg.draw.circle(screen, (200,200,200), point, 2)
+            pg.draw.circle(screen, (110,110,110), point, 2)
 
     def draw_mass_text(self, screen, mass):
         mass_text = mass_font.render(f"Mass: {mass}", True, (255, 255, 255))

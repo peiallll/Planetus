@@ -57,9 +57,9 @@ def main():
                         simulation.current_body = None
 
         if keys[pg.K_UP]:
-            simulation.adjust_mass(10000)
+            simulation.adjust_mass(50)
         if keys[pg.K_DOWN]:
-            simulation.adjust_mass(-10000)
+            simulation.adjust_mass(-50)
 
         simulation.update(dt)
 
