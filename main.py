@@ -1,6 +1,6 @@
 import pygame as pg
 import pygame_widgets
-from pygame_widgets.button import Button
+from pygame_widgets.button import ButtonArray
 import random as r
 
 from settings import settings as s 
@@ -16,11 +16,13 @@ option = 1
 arrow_enabled = True
 btn_font = pg.font.SysFont('Arial', 20)
 
-def toggle_trail():
+def trail_type():
     global option
     option += 1
     if option > 3:
         option = 1
+
+    dotted_button = buttonArray.buttons[0] 
 
     if option == 1:
         simulation.trail_enabled = True
@@ -35,10 +37,14 @@ def toggle_trail():
         dotted_button.setText("NO TRAIL")       
 
 def toggle_arrow():
+    arrow_button = buttonArray.buttons[1]
+
     simulation.arrow_enabled = not simulation.arrow_enabled
     if simulation.arrow_enabled:
+        arrow_button.textColour = (0,200,0)
         arrow_button.setText("ENABLED")
     else:
+        arrow_button.textColour = (200,0,0)
         arrow_button.setText("DISABLED")
 
 def main():
@@ -53,11 +59,14 @@ def main():
 
     drawing_line = False
 
-    global dotted_button
-    global arrow_button
-    dotted_button = Button(screen, 10, 10, 100, 40, text='SOLID', font=btn_font, onClick=toggle_trail)
-    arrow_button = Button(screen, 10, 60, 100, 40, text='ENABLED', font=btn_font, onClick=toggle_arrow)
-    
+    global buttonArray
+
+    buttonArray = ButtonArray(
+        screen, 10, 10, 100, 150, (1, 2), seperationThickness=50,
+        colour = (0,0,0),
+        texts=('SOLID', 'ENABLED'),
+        onClicks = (trail_type, toggle_arrow),
+    )
 
     while running:
         screen.fill((0,0,0))
