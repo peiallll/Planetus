@@ -13,6 +13,7 @@ simulation = Simulation()
 
 dotted_button = None
 option = 1
+arrow_enabled = True
 btn_font = pg.font.SysFont('Arial', 20)
 
 def toggle_trail():
@@ -31,8 +32,14 @@ def toggle_trail():
         dotted_button.setText("DOTTED")
     elif option == 3:
         simulation.trail_enabled = False
-        dotted_button.setText("NO TRAIL")        
+        dotted_button.setText("NO TRAIL")       
 
+def toggle_arrow():
+    simulation.arrow_enabled = not simulation.arrow_enabled
+    if simulation.arrow_enabled:
+        arrow_button.setText("ENABLED")
+    else:
+        arrow_button.setText("DISABLED")
 
 def main():
     pg.init()
@@ -47,7 +54,10 @@ def main():
     drawing_line = False
 
     global dotted_button
+    global arrow_button
     dotted_button = Button(screen, 10, 10, 100, 40, text='SOLID', font=btn_font, onClick=toggle_trail)
+    arrow_button = Button(screen, 10, 60, 100, 40, text='ENABLED', font=btn_font, onClick=toggle_arrow)
+    
 
     while running:
         screen.fill((0,0,0))
@@ -92,12 +102,16 @@ def main():
         if keys[pg.K_DOWN]:
             simulation.adjust_mass(-50)
 
-        simulation.update(dt)
+        if len(simulation.bodies) > 0:
+            simulation.update(dt)
 
         renderer.draw_bodies(screen, simulation.bodies)
         renderer.draw_background(screen, simulation.sim_speed)
         renderer.draw_bodies(screen, simulation.bodies)
-        renderer.draw_body_trail(screen, simulation.bodies) 
+        renderer.draw_body_trail(screen, simulation.bodies)
+
+        if not drawing_line and simulation.arrow_enabled:
+            renderer.draw_direction_arrow(screen, simulation.bodies)
 
         if drawing_line and simulation.current_body:
             simulation.set_inital_velocity(simulation.current_body)

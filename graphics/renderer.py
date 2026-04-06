@@ -43,6 +43,17 @@ class Renderer:
 
         screen.blit(v_text, v_rect)
 
+    def draw_direction_arrow(self, screen, bodies):
+        for body in bodies:
+            pg.draw.line(screen, (255,255,255), (body.x, body.y), body.v_arrow_end, 3)
+            pg.draw.line(screen, (255,255,255), (body.v_arrow_end), body.left_tip_end, 3)
+            pg.draw.line(screen, (255,255,255), (body.v_arrow_end), body.right_tip_end, 3)
+
+            v_text = v_font.render(f"velocity: {round(body.v,2)}", True, (255, 255, 255))
+            v_rect = v_text.get_rect(center=((body.v_arrow_end[0], body.v_arrow_end[1] - 20)))
+
+            screen.blit(v_text, v_rect)
+
     def draw_ghost_orbit(self, screen, path_points):
         for point in path_points:
             pg.draw.circle(screen, (110,110,110), point, 2)

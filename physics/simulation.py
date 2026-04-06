@@ -22,6 +22,7 @@ class Simulation:
         self.trail_decider = 0
         self.trail_decider_value = 1
         self.trail_enabled = True
+        self.arrow_enabled = True
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
@@ -99,6 +100,23 @@ class Simulation:
             self.id += 1
 
     def update(self, dt):
+        for body in self.bodies:
+            if self.arrow_enabled:
+                body.v_arrow_end = None
+
+                direction_r = m.atan2(body.vy, body.vx)
+                body.direction = direction_r * (180 / m.pi)
+                    
+                body.line_length = m.sqrt(body.vx**2 + body.vy**2) * 2
+
+                end_x = body.x + (m.cos(direction_r) * body.line_length)
+                end_y = body.y + (m.sin(direction_r) * body.line_length)
+
+                body.v_arrow_end = (end_x, end_y)
+
+                body.left_tip_end = (end_x - m.cos(direction_r + 0.5) * 10, end_y - m.sin(direction_r + 0.5) * 10)
+                body.right_tip_end = (end_x - m.cos(direction_r - 0.5) * 10, end_y - m.sin(direction_r - 0.5) * 10)
+
         if self.paused:
             return
         
@@ -131,6 +149,8 @@ class Simulation:
 
                 body.vx += ax * dt
                 body.vy += ay * dt
+
+                body.v = m.sqrt(body.vx**2 + body.vy**2)
 
             for body in self.bodies:
                 body.x += body.vx * dt

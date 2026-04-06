@@ -6,6 +6,8 @@ class Body:
         self.vx = vx
         self.vy = vy
 
+        self.v = 0
+
         self.mass = mass
         self.radius = radius
 
@@ -18,6 +20,13 @@ class Body:
 
         self.trail_points = {}
         self.trail_count = 0
+
+        self.line_length = 0
+        self.v_arrow_end = (self.x, self.y)
+        self.left_tip_end = (self.x, self.y)
+        self.right_tip_end = (self.x, self.y)
+
+        self.direction = 0
 
     def __repr__(self):
         return f"Body(id={self.name}, mass={self.mass})"
