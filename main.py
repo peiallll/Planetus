@@ -62,6 +62,8 @@ def main():
     while running:
         screen.fill((0,0,0))
         dt = clock.tick(s.FPS) / 1000
+        
+        fps = int(clock.get_fps())
 
         keys = pg.key.get_pressed()
         events = pg.event.get()
@@ -87,9 +89,9 @@ def main():
                     simulation.toggle_pause()
 
                 if event.key == pg.K_LSHIFT:
-                    simulation.sim_speed = min(100, simulation.sim_speed + 1)
+                    simulation.sim_speed = min(500, simulation.sim_speed + 10)
                 if event.key == pg.K_LCTRL:
-                    simulation.sim_speed = max(1, simulation.sim_speed - 1)
+                    simulation.sim_speed = max(1, simulation.sim_speed - 10)
                     
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -106,7 +108,7 @@ def main():
             simulation.update(dt)
 
         renderer.draw_bodies(screen, simulation.bodies)
-        renderer.draw_background(screen, simulation.sim_speed)
+        renderer.draw_background(screen, simulation.sim_speed, fps, simulation.get_time(dt))
         renderer.draw_bodies(screen, simulation.bodies)
         renderer.draw_body_trail(screen, simulation.bodies)
 

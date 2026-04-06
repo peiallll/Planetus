@@ -6,7 +6,7 @@ from settings import settings as s
 pg.font.init()
 mass_font = pg.font.SysFont('Arial', 30)
 paused_font = pg.font.SysFont('Arial', 35)
-instructions_font = pg.font.SysFont('Arial', 25)
+small_medium_font = pg.font.SysFont('Arial', 25)
 
 v_font = pg.font.SysFont('Arial', 15)
 
@@ -17,15 +17,19 @@ class Renderer:
             for _ in range(150)
         ]
 
-    def draw_background(self, screen, sim_speed):
+    def draw_background(self, screen, sim_speed, fps, time):
         for x, y in self.stars:
             pg.draw.circle(screen, (255,255,255), (x, y), 1)
 
         for i, line in enumerate("B to create new bodies\nSpace to pause\nX to clear all bodies on screen\n Shift/Control control speed of simulation".split("\n")):
-            instructions_text = instructions_font.render(line, True, (255,255,255))
+            instructions_text = small_medium_font.render(line, True, (255,255,255))
             screen.blit(instructions_text, (s.WIDTH * 0.025, (s.HEIGHT * 0.95) - i * 35))
 
-        screen.blit(instructions_font.render(f"Simulation Speed: {sim_speed}x", True, (255,255,255)), (s.WIDTH * 0.4, s.HEIGHT * 0.95))
+        fps_text = small_medium_font.render(f"FPS: {fps}", True, (255,255,255))
+        time_text = small_medium_font.render(f"Time: {round(time)}", True, (255,255,255))
+        screen.blit(fps_text, (s.WIDTH * 0.9, s.HEIGHT * 0.025))
+        screen.blit(time_text, (s.WIDTH * 0.9, s.HEIGHT * 0.05))
+        screen.blit(small_medium_font.render(f"Simulation Speed: {sim_speed}x", True, (255,255,255)), (s.WIDTH * 0.4, s.HEIGHT * 0.95))
 
     def draw_bodies(self, screen, bodies):
         for body in bodies:

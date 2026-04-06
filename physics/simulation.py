@@ -23,6 +23,7 @@ class Simulation:
         self.trail_decider_value = 1
         self.trail_enabled = True
         self.arrow_enabled = True
+        self.elapsed_time = 0
 
     def adjust_mass(self, amount):
         self.current_mass = max(10, self.current_mass + amount)
@@ -99,6 +100,11 @@ class Simulation:
             self.bodies.append(new_body)
             self.id += 1
 
+    def get_time(self, dt):
+        if not self.paused:
+            self.elapsed_time += dt * self.sim_speed
+        return self.elapsed_time
+    
     def update(self, dt):
         for body in self.bodies:
             if self.arrow_enabled:
