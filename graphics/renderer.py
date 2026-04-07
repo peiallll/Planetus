@@ -54,9 +54,9 @@ class Renderer:
     def draw_ruler(self, screen, start_x, start_y, end_x, end_y, ruler_length):
         pg.draw.line(screen, (255, 255, 255), (start_x, start_y), (end_x, end_y), 3)
         
-        line_midpoint_x, line_midpoint_y = self.line_midpoint(start_x, end_y, start_y, end_y)
+        line_midpoint_x, line_midpoint_y = self.line_midpoint(start_x, end_x, start_y, end_y)
 
-        d_text = small_font.render(f"distance: {ruler_length / 1000}km", True, (255,255,255))
+        d_text = small_font.render(f"distance: {round(ruler_length / 1000, 2)}km", True, (255,255,255))
         d_rect = d_text.get_rect(center=(line_midpoint_x, line_midpoint_y + 30))
 
         screen.blit(d_text, d_rect)

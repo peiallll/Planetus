@@ -47,6 +47,9 @@ def toggle_arrow():
         arrow_button.textColour = (200,0,0)
         arrow_button.setText("DISABLED")
 
+def reset_time():
+    simulation.elapsed_time = 0
+
 def main():
     pg.init()
 
@@ -62,10 +65,11 @@ def main():
 
     global buttonArray
     buttonArray = ButtonArray(
-        screen, 10, 10, 100, 150, (1, 2), seperationThickness=50,
+        screen, 10, 10, 125, 200, (1, 3), seperationThickness=50,
         colour = (0,0,0),
-        texts=('SOLID', 'ENABLED'),
-        onClicks = (trail_type, toggle_arrow),
+        texts=('SOLID', 'ENABLED', 'RESET TIME'),
+        onClicks = (trail_type, toggle_arrow, reset_time),
+        fontSize = 5
     )
 
     while running:
@@ -122,7 +126,7 @@ def main():
 
         if drawing_ruler and start_place and not drawing_line:
             mouse_x, mouse_y = pg.mouse.get_pos()
-            ruler_length = simulation.ruler_length(start_place[0], start_place[1], mouse_x, mouse_y)
+            ruler_length = simulation.ruler_length(start_place[0], mouse_x, start_place[1], mouse_y)
             renderer.draw_ruler(screen, start_place[0], start_place[1], mouse_x, mouse_y, ruler_length)
 
         if len(simulation.bodies) > 0:
