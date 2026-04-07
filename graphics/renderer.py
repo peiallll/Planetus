@@ -8,7 +8,7 @@ mass_font = pg.font.SysFont('Arial', 30)
 paused_font = pg.font.SysFont('Arial', 35)
 small_medium_font = pg.font.SysFont('Arial', 25)
 
-v_font = pg.font.SysFont('Arial', 15)
+small_font = pg.font.SysFont('Arial', 15)
 
 class Renderer:
     def __init__(self):
@@ -26,35 +26,54 @@ class Renderer:
             screen.blit(instructions_text, (s.WIDTH * 0.025, (s.HEIGHT * 0.95) - i * 35))
 
         fps_text = small_medium_font.render(f"FPS: {fps}", True, (255,255,255))
-        time_text = small_medium_font.render(f"Time: {round(time)}", True, (255,255,255))
+        time_text = small_medium_font.render(f"Time: {round(time / 86400, 2)}d", True, (255,255,255))
         screen.blit(fps_text, (s.WIDTH * 0.9, s.HEIGHT * 0.025))
-        screen.blit(time_text, (s.WIDTH * 0.9, s.HEIGHT * 0.05))
+        screen.blit(time_text, (s.WIDTH * 0.8, s.HEIGHT * 0.05))
         screen.blit(small_medium_font.render(f"Simulation Speed: {sim_speed}x", True, (255,255,255)), (s.WIDTH * 0.4, s.HEIGHT * 0.95))
 
     def draw_bodies(self, screen, bodies):
         for body in bodies:
-            pg.draw.circle(screen, body.colour, (body.x, body.y), body.radius)
+            px = int(body.x / s.DISTANCE_SCALE)
+            py = int(body.y / s.DISTANCE_SCALE)
+            pg.draw.circle(screen, body.colour, (px, py), body.radius)
 
     def draw_line(self, screen, body, v):
         mouse_pos = pg.mouse.get_pos()
-        pg.draw.line(screen, (255,175,175), (body.x, body.y), mouse_pos, 5)
+        body_x = int(body.x / s.DISTANCE_SCALE)
+        body_y = int(body.y / s.DISTANCE_SCALE)
 
-        line_midpoint_x = (body.x + mouse_pos[0]) // 2
-        line_midpoint_y = (body.y + mouse_pos[1]) // 2
+        pg.draw.line(screen, (255,175,175), (body_x, body_y), mouse_pos, 5)
 
-        v_text = v_font.render(f"velocity: {v}", True, (255, 255, 255))
+        line_midpoint_x, line_midpoint_y = self.line_midpoint(body_x, mouse_pos[0], body_y, mouse_pos[1])
+
+        v_text = small_font.render(f"velocity: {v} m/s", True, (255,255,255))
         v_rect = v_text.get_rect(center=(line_midpoint_x, line_midpoint_y + 30))
 
         screen.blit(v_text, v_rect)
 
+    def draw_ruler(self, screen, start_x, start_y, end_x, end_y, ruler_length):
+        pg.draw.line(screen, (255, 255, 255), (start_x, start_y), (end_x, end_y), 3)
+        
+        line_midpoint_x, line_midpoint_y = self.line_midpoint(start_x, end_y, start_y, end_y)
+
+        d_text = small_font.render(f"distance: {ruler_length / 1000}km", True, (255,255,255))
+        d_rect = d_text.get_rect(center=(line_midpoint_x, line_midpoint_y + 30))
+
+        screen.blit(d_text, d_rect)
+
+    def line_midpoint(self, start_x, end_x, start_y, end_y):
+        mid_x = (start_x + end_x) // 2
+        mid_y = (start_y + end_y) // 2
+        return mid_x, mid_y
+    
     def draw_direction_arrow(self, screen, bodies):
         for body in bodies:
-            pg.draw.line(screen, (255,255,255), (body.x, body.y), body.v_arrow_end, 3)
-            pg.draw.line(screen, (255,255,255), (body.v_arrow_end), body.left_tip_end, 3)
-            pg.draw.line(screen, (255,255,255), (body.v_arrow_end), body.right_tip_end, 3)
+            pg.draw.line(screen, (255,255,255), (int(body.x / s.DISTANCE_SCALE), int(body.y / s.DISTANCE_SCALE)), body.v_arrow_end, 3)
+            pg.draw.line(screen, (255,255,255), body.v_arrow_end, body.left_tip_end, 3)
+            pg.draw.line(screen, (255,255,255), body.v_arrow_end, body.right_tip_end, 3)
 
-            v_text = v_font.render(f"velocity: {round(body.v,2)}", True, (255, 255, 255))
-            v_rect = v_text.get_rect(center=((body.v_arrow_end[0], body.v_arrow_end[1] - 20)))
+            v_text = small_font.render(f"velocity: {round(body.v,2)} m/s", True, (255, 255, 255))
+            v_rect = v_text.get_rect(center=(body.v_arrow_end[0], body.v_arrow_end[1] - 20))
 
             screen.blit(v_text, v_rect)
 
@@ -68,7 +87,7 @@ class Renderer:
                 pg.draw.circle(screen, body.colour, point, 1)
 
     def draw_mass_text(self, screen, mass):
-        mass_text = mass_font.render(f"Mass: {mass}", True, (255, 255, 255))
+        mass_text = mass_font.render(f"Mass: {mass:.2e}", True, (255, 255, 255))
         text_rect = mass_text.get_rect(center=(s.WIDTH * 0.9, s.HEIGHT * 0.9))
         screen.blit(mass_text, text_rect)
     

@@ -11,7 +11,7 @@ class Simulation:
     def __init__(self):
         self.bodies = []
         self.current_body = None
-        self.current_mass = 5000
+        self.current_mass = s.DEFAULT_BODY_MASS
         self.current_body_initial_velocity = 0
         self.paused = False
         self.paused_text = ""
@@ -26,7 +26,7 @@ class Simulation:
         self.elapsed_time = 0
 
     def adjust_mass(self, amount):
-        self.current_mass = max(10, self.current_mass + amount)
+        self.current_mass = max(s.MIN_BODY_MASS, self.current_mass + amount * s.MASS_SCALE)
 
     def toggle_pause(self):
         self.paused = not self.paused
@@ -35,17 +35,21 @@ class Simulation:
     def set_inital_velocity(self, body):
         x, y = pg.mouse.get_pos()
 
-        dx = x - body.x
-        dy = y - body.y
+        body_screen_x = int(body.x / s.DISTANCE_SCALE)
+        body_screen_y = int(body.y / s.DISTANCE_SCALE)
+
+        dx = x - body_screen_x
+        dy = y - body_screen_y
         
-        body.vx = dx / 5
-        body.vy = dy / 5
+        body.vx = dx * s.DISTANCE_SCALE * s.MOUSE_VELOCITY_FACTOR / s.TIME_SCALE / 5
+        body.vy = dy * s.DISTANCE_SCALE * s.MOUSE_VELOCITY_FACTOR / s.TIME_SCALE / 5
 
         self.current_body_initial_velocity = round(m.sqrt((body.vx**2) + (body.vy**2)), 2)
 
-    def ghost_orbit(self, current_body, steps=3000, dt=0.1, record_every=10):
+    def ghost_orbit(self, steps=3000, dt=0.1, record_every=10):
         self.ghost_bodies = [copy.copy(b) for b in self.bodies]
         path_points = []
+        dt_physical = dt * s.TIME_SCALE
 
         current_ghost = self.ghost_bodies[-1]
 
@@ -53,13 +57,16 @@ class Simulation:
             for ghost in self.ghost_bodies:
                 total_fx, total_fy = 0, 0
                 for neighbour in self.ghost_bodies:
-                    if neighbour is ghost: continue
+                    if neighbour is ghost:
+                        continue
                     
                     dx = neighbour.x - ghost.x
                     dy = neighbour.y - ghost.y
                     distance = m.sqrt((dx**2) + (dy**2))
+                    if distance == 0:
+                        continue
                     
-                    force = (s.G * ghost.mass * neighbour.mass) / (distance**2 + 0.1)
+                    force = (s.G * ghost.mass * neighbour.mass) / (distance**2 + 1)
 
                     total_fx += force * (dx / distance)
                     total_fy += force * (dy / distance)
@@ -67,15 +74,15 @@ class Simulation:
                 ax = total_fx / ghost.mass
                 ay = total_fy / ghost.mass
 
-                ghost.vx += ax * dt
-                ghost.vy += ay * dt
+                ghost.vx += ax * dt_physical
+                ghost.vy += ay * dt_physical
 
             for ghost in self.ghost_bodies:
-                ghost.x += ghost.vx * dt
-                ghost.y += ghost.vy * dt
+                ghost.x += ghost.vx * dt_physical
+                ghost.y += ghost.vy * dt_physical
                 
             if i % record_every == 0:
-                path_points.append((current_ghost.x, current_ghost.y))
+                path_points.append((int(current_ghost.x / s.DISTANCE_SCALE), int(current_ghost.y / s.DISTANCE_SCALE)))
         return path_points
 
     def add_random_body(self):
@@ -85,13 +92,18 @@ class Simulation:
         x, y = pg.mouse.get_pos()
 
         if x > 0 and x < s.WIDTH - 5 and y > 0 and y < s.HEIGHT - 5:
+            x_m = x * s.DISTANCE_SCALE
+            y_m = y * s.DISTANCE_SCALE
+            physical_radius = ((3 * self.current_mass) / (4 * m.pi * s.DENSITY)) ** (1/3)
+            radius_pixels = max(4, int(physical_radius / s.DISTANCE_SCALE))
+
             new_body = Body(
-                    x,
-                    y,
+                    x_m,
+                    y_m,
                     0,
                     0,
                     self.current_mass,
-                    self.current_mass ** (1/5),
+                    radius_pixels,
                     (r.randint(0,255), r.randint(0,255), r.randint(0,255)),
                     f"{self.id}"
                 )
@@ -102,21 +114,26 @@ class Simulation:
 
     def get_time(self, dt):
         if not self.paused:
-            self.elapsed_time += dt * self.sim_speed
+            self.elapsed_time += dt * self.sim_speed * s.TIME_SCALE
         return self.elapsed_time
     
     def update(self, dt):
+        dt_physical = dt * s.TIME_SCALE
+
         for body in self.bodies:
             if self.arrow_enabled:
                 body.v_arrow_end = None
 
+                screen_x = int(body.x / s.DISTANCE_SCALE)
+                screen_y = int(body.y / s.DISTANCE_SCALE)
+
                 direction_r = m.atan2(body.vy, body.vx)
                 body.direction = direction_r * (180 / m.pi)
                     
-                body.line_length = m.sqrt(body.vx**2 + body.vy**2) * 2
+                body.line_length = m.sqrt(body.vx**2 + body.vy**2) / s.DISTANCE_SCALE * s.ARROW_SCALE
 
-                end_x = body.x + (m.cos(direction_r) * body.line_length)
-                end_y = body.y + (m.sin(direction_r) * body.line_length)
+                end_x = screen_x + (m.cos(direction_r) * body.line_length)
+                end_y = screen_y + (m.sin(direction_r) * body.line_length)
 
                 body.v_arrow_end = (end_x, end_y)
 
@@ -138,11 +155,12 @@ class Simulation:
                     dy = neighbour.y - body.y
 
                     distance = m.sqrt(dx**2 + dy**2)
-                    #
+                    if distance == 0:
+                        continue
                     direction_x = dx / distance
                     direction_y = dy / distance
 
-                    force = (s.G * body.mass * neighbour.mass) / (distance**2 + 0.1) #Newton's law
+                    force = (s.G * body.mass * neighbour.mass) / (distance**2 + 1)
 
                     fx = force * direction_x
                     fy = force * direction_y
@@ -153,18 +171,20 @@ class Simulation:
                 ax = total_fx / body.mass
                 ay = total_fy / body.mass
 
-                body.vx += ax * dt
-                body.vy += ay * dt
+                body.vx += ax * dt_physical
+                body.vy += ay * dt_physical
 
                 body.v = m.sqrt(body.vx**2 + body.vy**2)
 
             for body in self.bodies:
-                body.x += body.vx * dt
-                body.y += body.vy * dt
+                body.x += body.vx * dt_physical
+                body.y += body.vy * dt_physical
 
                 if self.trail_enabled:
                     if self.trail_decider % self.trail_decider_value == 0:
-                        body.trail_points[(body.x, body.y)] = t.time()
+                        body_screen_x = int(body.x / s.DISTANCE_SCALE)
+                        body_screen_y = int(body.y / s.DISTANCE_SCALE)
+                        body.trail_points[(body_screen_x, body_screen_y)] = t.time()
 
                     while body.trail_points:
                         oldest_point = next(iter(body.trail_points))
@@ -176,7 +196,28 @@ class Simulation:
                         body.trail_points.clear()
 
             for body in self.bodies:
-                if body.x > s.WIDTH * 2 or body.x < -s.WIDTH * 2 or body.y > s.HEIGHT * 2 or body.y < -s.HEIGHT * 2:
+                if body.x > s.WIDTH * s.DISTANCE_SCALE * 2 or body.x < -s.WIDTH * s.DISTANCE_SCALE * 2 or body.y > s.HEIGHT * s.DISTANCE_SCALE * 2 or body.y < -s.HEIGHT * s.DISTANCE_SCALE * 2:
                     self.bodies.remove(body)
 
             self.trail_decider += 1
+
+    def ruler_length(self, start_x, end_x, start_y, end_y):
+        dx = end_x - start_x
+        dy = end_y - start_y
+
+        return m.sqrt(dx**2 + dy**2) * s.DISTANCE_SCALE
+
+    def check_collision(self):
+        for i, body in enumerate(self.bodies):
+            for neighbour in self.bodies[i+1:]:
+                dx = neighbour.x - body.x
+                dy = neighbour.y - body.y
+
+                distance = m.sqrt(dx**2 + dy**2)
+                radii_total = (body.radius + neighbour.radius) * s.DISTANCE_SCALE
+
+                if distance < radii_total:
+                    self.collide(body, neighbour)
+
+    def collide(self, body, neighbour):
+        pass

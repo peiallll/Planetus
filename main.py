@@ -58,9 +58,9 @@ def main():
     running = True
 
     drawing_line = False
+    drawing_ruler = False
 
     global buttonArray
-
     buttonArray = ButtonArray(
         screen, 10, 10, 100, 150, (1, 2), seperationThickness=50,
         colour = (0,0,0),
@@ -75,6 +75,7 @@ def main():
         fps = int(clock.get_fps())
 
         keys = pg.key.get_pressed()
+        mouse = pg.mouse.get_pressed()
         events = pg.event.get()
 
         for event in events:
@@ -98,20 +99,31 @@ def main():
                     simulation.toggle_pause()
 
                 if event.key == pg.K_LSHIFT:
-                    simulation.sim_speed = min(500, simulation.sim_speed + 10)
+                    simulation.sim_speed = min(30, simulation.sim_speed + 1)
                 if event.key == pg.K_LCTRL:
-                    simulation.sim_speed = max(1, simulation.sim_speed - 10)
+                    simulation.sim_speed = max(1, simulation.sim_speed - 1)
                     
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    drawing_ruler = True
+                    start_place = event.pos
                     if simulation.current_body:
                         drawing_line = False
                         simulation.current_body = None
+
+            if event.type == pg.MOUSEBUTTONUP:
+                if event.button == 1:
+                    drawing_ruler = False
 
         if keys[pg.K_UP]:
             simulation.adjust_mass(50)
         if keys[pg.K_DOWN]:
             simulation.adjust_mass(-50)
+
+        if drawing_ruler and start_place and not drawing_line:
+            mouse_x, mouse_y = pg.mouse.get_pos()
+            ruler_length = simulation.ruler_length(start_place[0], start_place[1], mouse_x, mouse_y)
+            renderer.draw_ruler(screen, start_place[0], start_place[1], mouse_x, mouse_y, ruler_length)
 
         if len(simulation.bodies) > 0:
             simulation.update(dt)
@@ -126,7 +138,7 @@ def main():
 
         if drawing_line and simulation.current_body:
             simulation.set_inital_velocity(simulation.current_body)
-            ghost_path = simulation.ghost_orbit(simulation.current_body)
+            ghost_path = simulation.ghost_orbit()
 
             if simulation.current_body_initial_velocity > 0:
                 renderer.draw_ghost_orbit(screen, ghost_path) 
