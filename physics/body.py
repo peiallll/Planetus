@@ -1,5 +1,5 @@
 class Body:
-    def __init__(self, x, y, vx, vy, mass, radius, colour, name):
+    def __init__(self, x, y, vx, vy, mass, radius, physical_radius, colour, name):
         self.x = x
         self.y = y
 
@@ -10,6 +10,7 @@ class Body:
 
         self.mass = mass
         self.radius = radius
+        self.physical_radius = physical_radius
 
         self.colour = colour
 

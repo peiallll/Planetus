@@ -104,6 +104,7 @@ class Simulation:
                     0,
                     self.current_mass,
                     radius_pixels,
+                    physical_radius,
                     (r.randint(0,255), r.randint(0,255), r.randint(0,255)),
                     f"{self.id}"
                 )
@@ -195,12 +196,15 @@ class Simulation:
                     if len(body.trail_points) != 0:
                         body.trail_points.clear()
 
-            for body in self.bodies:
-                if body.x > s.WIDTH * s.DISTANCE_SCALE * 2 or body.x < -s.WIDTH * s.DISTANCE_SCALE * 2 or body.y > s.HEIGHT * s.DISTANCE_SCALE * 2 or body.y < -s.HEIGHT * s.DISTANCE_SCALE * 2:
-                    self.bodies.remove(body)
-
+            self.bodies = [body for body in self.bodies if not self.out_of_bounds(body)]
             self.trail_decider += 1
 
+        self.check_collision()
+
+    def out_of_bounds(self, body):
+        if body.x > s.WIDTH * s.DISTANCE_SCALE * 2 or body.x < -s.WIDTH * s.DISTANCE_SCALE * 2 or body.y > s.HEIGHT * s.DISTANCE_SCALE * 2 or body.y < -s.HEIGHT * s.DISTANCE_SCALE * 2:
+            return True
+        
     def ruler_length(self, start_x, end_x, start_y, end_y):
         dx = end_x - start_x
         dy = end_y - start_y
@@ -214,10 +218,37 @@ class Simulation:
                 dy = neighbour.y - body.y
 
                 distance = m.sqrt(dx**2 + dy**2)
-                radii_total = (body.radius + neighbour.radius) * s.DISTANCE_SCALE
-
+                radii_total = body.physical_radius + neighbour.physical_radius
                 if distance < radii_total:
                     self.collide(body, neighbour)
 
     def collide(self, body, neighbour):
-        pass
+        final_vx = ((body.mass * body.vx) + (neighbour.mass * neighbour.vx)) / (body.mass + neighbour.mass)
+        final_vy = ((body.mass * body.vy) + (neighbour.mass * neighbour.vy)) / (body.mass + neighbour.mass)
+
+        final_mass = body.mass + neighbour.mass
+
+        new_x = (body.x * body.mass + neighbour.x * neighbour.mass) / final_mass
+        new_y = (body.y * body.mass + neighbour.y * neighbour.mass) / final_mass
+
+        physical_radius = ((3 * final_mass) / (4 * m.pi * s.DENSITY)) ** (1/3)
+        radius_pixels = max(4, int(physical_radius / s.DISTANCE_SCALE))
+
+        new_body = Body(
+            new_x,
+            new_y,
+            final_vx,
+            final_vy,
+            final_mass,
+            radius_pixels,
+            physical_radius,
+            body.colour if body.physical_radius > neighbour.physical_radius else neighbour.colour,
+            f"{self.id}"
+        )
+
+        self.bodies.remove(body)
+        self.bodies.remove(neighbour)
+
+        self.bodies.append(new_body)
+
+        self.id += 1

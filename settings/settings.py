@@ -9,6 +9,6 @@ TIME_SCALE = 36000  #physical seconds simulated per real second of gameplay
 MASS_SCALE = 1e21  #mass increment unit in kilograms for interactive controls
 MIN_BODY_MASS = 1e20  #smallest allowed mass in kilograms
 DEFAULT_BODY_MASS = 5e23  #default body mass in kilograms
-DENSITY = 5510  
+DENSITY = 5510 #for radius
 ARROW_SCALE = 2e4  #scale factor for drawing velocity arrows in pixels
 MOUSE_VELOCITY_FACTOR = 10  #factor mapping drag distance to physical velocity
