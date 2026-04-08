@@ -50,6 +50,9 @@ def toggle_arrow():
 def reset_time():
     simulation.elapsed_time = 0
 
+def clear_bodies():
+    simulation.bodies.clear()
+
 def main():
     pg.init()
 
@@ -65,11 +68,10 @@ def main():
 
     global buttonArray
     buttonArray = ButtonArray(
-        screen, 10, 10, 125, 200, (1, 3), seperationThickness=50,
+        screen, 10, 10, 150, 200, (1, 4), seperationThickness=50,
         colour = (0,0,0),
-        texts=('SOLID', 'ENABLED', 'RESET TIME'),
-        onClicks = (trail_type, toggle_arrow, reset_time),
-        fontSize = 5
+        texts=('SOLID', 'ENABLED', 'RESET TIME', 'CLEAR BODIES'),
+        onClicks = (trail_type, toggle_arrow, reset_time, clear_bodies),
     )
 
     while running:
@@ -94,16 +96,13 @@ def main():
                     simulation.add_random_body()
                     print(simulation.bodies)
 
-                if event.key == pg.K_x:
-                    simulation.bodies.clear()
-
                 if event.key == pg.K_SPACE:
                     if drawing_line:
                         continue
                     simulation.toggle_pause()
 
                 if event.key == pg.K_LSHIFT:
-                    simulation.sim_speed = min(30, simulation.sim_speed + 1)
+                    simulation.sim_speed = min(100, simulation.sim_speed + 1)
                 if event.key == pg.K_LCTRL:
                     simulation.sim_speed = max(1, simulation.sim_speed - 1)
                     

@@ -21,7 +21,7 @@ class Renderer:
         for x, y in self.stars:
             pg.draw.circle(screen, (255,255,255), (x, y), 1)
 
-        for i, line in enumerate("B to create new bodies\nSpace to pause\nX to clear all bodies on screen\n Shift/Control control speed of simulation".split("\n")):
+        for i, line in enumerate("B: create new bodies\nSpace: pause simulation\nShift/Control: control speed of simulation".split("\n")):
             instructions_text = small_medium_font.render(line, True, (255,255,255))
             screen.blit(instructions_text, (s.WIDTH * 0.025, (s.HEIGHT * 0.95) - i * 35))
 
