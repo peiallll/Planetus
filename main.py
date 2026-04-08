@@ -102,7 +102,7 @@ def main():
                     simulation.toggle_pause()
 
                 if event.key == pg.K_LSHIFT:
-                    simulation.sim_speed = min(100, simulation.sim_speed + 1)
+                    simulation.sim_speed = min(10, simulation.sim_speed + 1)
                 if event.key == pg.K_LCTRL:
                     simulation.sim_speed = max(1, simulation.sim_speed - 1)
                     
@@ -130,6 +130,8 @@ def main():
 
         if len(simulation.bodies) > 0:
             simulation.update(dt)
+            if len(simulation.debris) > 0:
+                renderer.collision_effect(screen, simulation.debris)
 
         renderer.draw_bodies(screen, simulation.bodies)
         renderer.draw_background(screen, simulation.sim_speed, fps, simulation.get_time(dt))

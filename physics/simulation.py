@@ -5,6 +5,7 @@ import time as t
 import copy
 
 from physics.body import Body
+from physics.debris import DebrisParticle
 from settings import settings as s
 
 class Simulation:
@@ -24,6 +25,9 @@ class Simulation:
         self.trail_enabled = True
         self.arrow_enabled = True
         self.elapsed_time = 0
+        self.collision_x = None
+        self.collision_y = None
+        self.debris = []
 
     def adjust_mass(self, amount):
         self.current_mass = max(s.MIN_BODY_MASS, self.current_mass + amount * s.MASS_SCALE)
@@ -199,7 +203,11 @@ class Simulation:
             self.bodies = [body for body in self.bodies if not self.out_of_bounds(body)]
             self.trail_decider += 1
 
-        self.check_collision()
+        for particle in self.debris:
+            particle.glide()
+
+        self.debris = [particle for particle in self.debris if ((particle.x - particle.target_x)**2 + (particle.y - particle.target_y)**2)**0.5 > 2]
+        self.check_collision(dt)
 
     def out_of_bounds(self, body):
         if body.x > s.WIDTH * s.DISTANCE_SCALE * 2 or body.x < -s.WIDTH * s.DISTANCE_SCALE * 2 or body.y > s.HEIGHT * s.DISTANCE_SCALE * 2 or body.y < -s.HEIGHT * s.DISTANCE_SCALE * 2:
@@ -211,18 +219,27 @@ class Simulation:
 
         return m.sqrt(dx**2 + dy**2) * s.DISTANCE_SCALE
 
-    def check_collision(self):
+    def check_collision(self, dt):
+        to_collide = []
         for i, body in enumerate(self.bodies):
             for neighbour in self.bodies[i+1:]:
                 dx = neighbour.x - body.x
                 dy = neighbour.y - body.y
-
                 distance = m.sqrt(dx**2 + dy**2)
                 radii_total = body.physical_radius + neighbour.physical_radius
-                if distance < radii_total:
-                    self.collide(body, neighbour)
+                if distance < max(radii_total, body.v * dt * s.TIME_SCALE * 2) or distance < radii_total * 3:
+                    to_collide.append((body, neighbour))
+
+        for body, neighbour in to_collide:
+            if body in self.bodies and neighbour in self.bodies:
+                self.collide(body, neighbour)
 
     def collide(self, body, neighbour):
+        print("collision")
+
+        self.collision_x = (body.x + neighbour.x) / 2 / s.DISTANCE_SCALE
+        self.collision_y = (body.y + neighbour.y) / 2 / s.DISTANCE_SCALE
+
         final_vx = ((body.mass * body.vx) + (neighbour.mass * neighbour.vx)) / (body.mass + neighbour.mass)
         final_vy = ((body.mass * body.vy) + (neighbour.mass * neighbour.vy)) / (body.mass + neighbour.mass)
 
@@ -238,7 +255,7 @@ class Simulation:
             new_x,
             new_y,
             final_vx,
-            final_vy,
+            final_vy, 
             final_mass,
             radius_pixels,
             physical_radius,
@@ -250,5 +267,16 @@ class Simulation:
         self.bodies.remove(neighbour)
 
         self.bodies.append(new_body)
+        
+        particle_count = r.randint(30, 80)
 
+        for particle in range(particle_count):
+            new_debris_particle = DebrisParticle(
+                self.collision_x,
+                self.collision_y,
+                body.colour if body.physical_radius > neighbour.physical_radius else neighbour.colour
+            )
+
+            self.debris.append(new_debris_particle)
+      
         self.id += 1

@@ -95,3 +95,11 @@ class Renderer:
         paused_text = paused_font.render(f"{paused_state}", True, (200, 200, 200))
         text_rect = paused_text.get_rect(center=(s.WIDTH * 0.5, s.HEIGHT * 0.1))
         screen.blit(paused_text, text_rect)
+
+    def collision_effect(self, screen, particles):
+        for particle in particles:
+            pg.draw.circle(screen, particle.colour, (particle.x, particle.y), particle.radius)
+
+        
+
+            
