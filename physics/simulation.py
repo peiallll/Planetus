@@ -206,7 +206,7 @@ class Simulation:
         for particle in self.debris:
             particle.glide()
 
-        self.debris = [particle for particle in self.debris if ((particle.x - particle.target_x)**2 + (particle.y - particle.target_y)**2)**0.5 > 2]
+        self.debris = [particle for particle in self.debris if ((particle.x - particle.target_x)**2 + (particle.y - particle.target_y)**2)**0.5 > 2 and t.time() - particle.birth_time < 1]
         self.check_collision(dt)
 
     def out_of_bounds(self, body):
@@ -263,20 +263,19 @@ class Simulation:
             f"{self.id}"
         )
 
-        self.bodies.remove(body)
-        self.bodies.remove(neighbour)
-
         self.bodies.append(new_body)
         
-        particle_count = r.randint(30, 80)
+        particle_count = r.randint(100, 300)
 
         for particle in range(particle_count):
             new_debris_particle = DebrisParticle(
                 self.collision_x,
                 self.collision_y,
-                body.colour if body.physical_radius > neighbour.physical_radius else neighbour.colour
+                body.colour if body.physical_radius < neighbour.physical_radius else neighbour.colour,
             )
 
             self.debris.append(new_debris_particle)
       
+        self.bodies.remove(body)
+        self.bodies.remove(neighbour)
         self.id += 1

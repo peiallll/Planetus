@@ -99,7 +99,3 @@ class Renderer:
     def collision_effect(self, screen, particles):
         for particle in particles:
             pg.draw.circle(screen, particle.colour, (particle.x, particle.y), particle.radius)
-
-        
-
-            
