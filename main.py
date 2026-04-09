@@ -1,10 +1,10 @@
 import pygame as pg
 import pygame_widgets
 from pygame_widgets.button import ButtonArray
+from pygame_widgets.slider import Slider
 import random as r
 
-from settings import settings as s 
-from physics.body import Body
+from settings import settings as s
 from graphics.renderer import Renderer
 from physics.simulation import Simulation
 
@@ -74,6 +74,12 @@ def main():
         onClicks = (trail_type, toggle_arrow, reset_time, clear_bodies),
     )
 
+    global slider
+    slider = Slider(
+        screen, (int(s.WIDTH * 0.70)), (int(s.HEIGHT * 0.95)), 300, 15, min=1e20, max=7e25, step=1e24,
+        curved=True, handleRadius=15, handleColour=(25,25,25)
+    )
+
     while running:
         screen.fill((0,0,0))
         dt = clock.tick(s.FPS) / 1000
@@ -101,9 +107,9 @@ def main():
                         continue
                     simulation.toggle_pause()
 
-                if event.key == pg.K_LSHIFT:
+                if event.key == pg.K_UP:
                     simulation.sim_speed = min(10, simulation.sim_speed + 1)
-                if event.key == pg.K_LCTRL:
+                if event.key == pg.K_DOWN:
                     simulation.sim_speed = max(1, simulation.sim_speed - 1)
                     
             if event.type == pg.MOUSEBUTTONDOWN:
@@ -117,11 +123,6 @@ def main():
             if event.type == pg.MOUSEBUTTONUP:
                 if event.button == 1:
                     drawing_ruler = False
-
-        if keys[pg.K_UP]:
-            simulation.adjust_mass(50)
-        if keys[pg.K_DOWN]:
-            simulation.adjust_mass(-50)
 
         if drawing_ruler and start_place and not drawing_line:
             mouse_x, mouse_y = pg.mouse.get_pos()
@@ -153,6 +154,7 @@ def main():
         renderer.draw_mass_text(screen, simulation.current_mass)
         renderer.enable_paused_text(screen, simulation.paused_text)
 
+        simulation.current_mass = slider.getValue()
         pygame_widgets.update(events) 
         pg.display.flip()
     pg.quit()

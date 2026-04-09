@@ -21,7 +21,7 @@ class Renderer:
         for x, y in self.stars:
             pg.draw.circle(screen, (255,255,255), (x, y), 1)
 
-        for i, line in enumerate("B: create new bodies\nSpace: pause simulation\nShift/Control: control speed of simulation".split("\n")):
+        for i, line in enumerate("B: create new bodies\nSpace: pause simulation\nUP/DOWN arrow keys: control speed of simulation".split("\n")):
             instructions_text = small_medium_font.render(line, True, (255,255,255))
             screen.blit(instructions_text, (s.WIDTH * 0.025, (s.HEIGHT * 0.95) - i * 35))
 
@@ -88,7 +88,7 @@ class Renderer:
 
     def draw_mass_text(self, screen, mass):
         mass_text = mass_font.render(f"Mass: {mass:.2e}", True, (255, 255, 255))
-        text_rect = mass_text.get_rect(center=(s.WIDTH * 0.9, s.HEIGHT * 0.9))
+        text_rect = mass_text.get_rect(center=(s.WIDTH * 0.825, s.HEIGHT * 0.91))
         screen.blit(mass_text, text_rect)
     
     def enable_paused_text(self, screen, paused_state):

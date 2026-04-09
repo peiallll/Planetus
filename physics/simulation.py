@@ -29,9 +29,6 @@ class Simulation:
         self.collision_y = None
         self.debris = []
 
-    def adjust_mass(self, amount):
-        self.current_mass = max(s.MIN_BODY_MASS, self.current_mass + amount * s.MASS_SCALE)
-
     def toggle_pause(self):
         self.paused = not self.paused
         self.paused_text = "PAUSED" if self.paused else ""
